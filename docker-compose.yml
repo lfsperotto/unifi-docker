@@ -1,0 +1,56 @@
+version: '3.6'
+services:
+  db:
+    image: mongo:3.6
+    networks:
+      - unifi
+    restart: always
+    volumes:
+      - db_config:/data/configdb
+      - db_data:/data/db
+  controller:
+    depends_on:
+      - db
+    environment:
+      DB_NAME: unifi
+      DB_URI: mongodb://db/unifi
+      STATDB_URI: mongodb://db/unifi_stat
+    image: jacobalberty/unifi:6.0.45
+    init: true
+    networks:
+      - unifi
+    ports:
+      - "3478:3478/udp" # STUN
+      - "6789:6789/tcp" # Speed test
+      - "8080:8080/tcp" # Device/ controller comm.
+      - "8443:8443/tcp" # Controller GUI/API as seen in a web browser
+      - "8880:8880/tcp" # HTTP portal redirection
+      - "8843:8843/tcp" # HTTPS portal redirection
+      - "10001:10001/udp" # AP discovery
+    restart: always
+    sysctls:
+      net.ipv4.ip_unprivileged_port_start: 0
+    user: unifi
+    volumes:
+      # Mount local folder for backups and autobackups
+      - controller_backup:/unifi/data/backup
+      - controller_cert:/unifi/cert
+      - controller_data:/unifi/data
+      - controller_dir:/unifi
+      - controller_init:/unifi/init.d
+      - controller_log:/unifi/log
+      - controller_run:/var/run/unifi
+
+networks:
+  unifi:
+
+volumes:
+  db_config:
+  db_data:
+  controller_backup:
+  controller_cert:
+  controller_data:
+  controller_dir:
+  controller_init:
+  controller_log:
+  controller_run:
