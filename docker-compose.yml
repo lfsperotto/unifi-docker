@@ -1,14 +1,16 @@
 version: '3.6'
 services:
   db:
+    container_name: unifi-controller-db
     image: mongo:3.6
     networks:
       - unifi
     restart: always
     volumes:
-      - db_config:/data/configdb
-      - db_data:/data/db
+      - unifi-controller-db-config:/data/configdb
+      - unifi-controller-db-data:/data/db
   controller:
+    container_name: unifi-controller
     depends_on:
       - db
     environment:
@@ -22,7 +24,7 @@ services:
     ports:
       - "3478:3478/udp" # STUN
       - "6789:6789/tcp" # Speed test
-      - "8080:8080/tcp" # Device/ controller comm.
+      - "8080:8080/tcp" # Device/ controller communication.
       - "8443:8443/tcp" # Controller GUI/API as seen in a web browser
       - "8880:8880/tcp" # HTTP portal redirection
       - "8843:8843/tcp" # HTTPS portal redirection
@@ -33,24 +35,32 @@ services:
     user: unifi
     volumes:
       # Mount local folder for backups and autobackups
-      - controller_backup:/unifi/data/backup
-      - controller_cert:/unifi/cert
-      - controller_data:/unifi/data
-      - controller_dir:/unifi
-      - controller_init:/unifi/init.d
-      - controller_log:/unifi/log
-      - controller_run:/var/run/unifi
-
+      - unifi-controller-backup:/unifi/data/backup
+      - unifi-controller-cert:/unifi/cert
+      - unifi-controller-data:/unifi/data
+      - unifi-controller:/unifi
+      - unifi-controller-init:/unifi/init.d
+      - unifi-controller-log:/unifi/log
+      - unifi-controller-run:/var/run/unifi
 networks:
   unifi:
-
+    name: unifi
 volumes:
-  db_config:
-  db_data:
-  controller_backup:
-  controller_cert:
-  controller_data:
-  controller_dir:
-  controller_init:
-  controller_log:
-  controller_run:
+  unifi-controller-db-config:
+    name: unifi-controller-db-config
+  name: unifi-controller-db-data:
+    name: unifi-controller-db-data
+  unifi-controller-backup:
+    name: unifi-controller-backup
+  unifi-controller-cert:
+    name: unifi-controller-cert
+  unifi-controller-data:
+    name: unifi-controller-data
+  unifi-controller:
+    name: unifi-controller
+  unifi-controller-init:
+    name: unifi-controller-init
+  unifi-controller-log:
+    name: unifi-controller-log
+  unifi-controller-run:
+    name: unifi-controller-run
